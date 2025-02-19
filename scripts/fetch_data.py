@@ -35,13 +35,13 @@ def fetch_real_time_generation(tgt, start_date, end_date):
         # print
         print(f"\nFetching interval {interval_count}: {current_start} to {current_end}")
 
-        # Prepare the request payload
+        # req. payload
         payload = {
             "startDate": current_start.isoformat(),
             "endDate": current_end.isoformat()
         }
 
-        # Set the headers with the TGT in a custom header
+        # custom tgt header
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -49,25 +49,25 @@ def fetch_real_time_generation(tgt, start_date, end_date):
         }
 
         try:
-            # Make a POST request to the API
+            # POST req
             print("Making request to the API...")
             response = requests.post(API_URL, json=payload, headers=headers, timeout=90)
-            response.raise_for_status()  # Raise an error for bad status codes
+            response.raise_for_status()  # Raise an error
 
-            # Parse the JSON response
+            # parsing
             data = response.json()
 
-            # Check if the response contains the expected data
-            if isinstance(data, dict) and "items" in data:  # Adjust "items" based on the actual key
-                items = data["items"]  # Extract the nested data
+            # check
+            if isinstance(data, dict) and "items" in data:
+                items = data["items"]
                 all_data.extend(items)
                 print(f"Fetched {len(items)} records.")
             else:
                 print("No data found for this interval.")
         except requests.exceptions.RequestException as e:
             print(f"Error fetching data: {e}")
-            print(f"Response content: {response.content}")  # Print the response content for debugging
-            # Continue to the next interval instead of breaking
+            print(f"Response content: {response.content}")  # debug response
+            # next interval
             current_start = current_end
             interval_count += 1
             continue
@@ -76,6 +76,5 @@ def fetch_real_time_generation(tgt, start_date, end_date):
         current_start = current_end
         interval_count += 1
 
-    # Convert the list of data to a DataFrame
     df = pd.DataFrame(all_data)
     return df
